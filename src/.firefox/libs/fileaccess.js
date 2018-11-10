@@ -48,6 +48,7 @@ function readFile(name) {
   try {
     fstream.init(file, -1, 0, 0);
     cstream.init(fstream, "UTF-8", 0, 0);
+<<<<<<< HEAD
     let (str = {}) {
       let read = 0;
       do {
@@ -55,6 +56,14 @@ function readFile(name) {
         data += str.value;
       } while (read != 0);
     }
+=======
+    let str = {};
+    let read = 0;
+    do {
+      read = cstream.readString(0xffffffff, str);
+      data += str.value;
+    } while (read != 0);
+>>>>>>> master
   } finally {
     cstream.close();
   }
@@ -72,4 +81,8 @@ function removeFile(name) {
 exports["exists"] = exists;
 exports["writeFile"] = writeFile;
 exports["readFile"] = readFile;
+<<<<<<< HEAD
 exports["removeFile"] = removeFile;
+=======
+exports["removeFile"] = removeFile;
+>>>>>>> master

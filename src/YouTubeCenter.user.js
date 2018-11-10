@@ -4948,6 +4948,7 @@
         }
         return videos;
       }
+<<<<<<< HEAD
       function loadVideoConfig(item, callback) {
         if (item.stream && item.storyboard) {
           callback(item.stream, item.storyboard);
@@ -4960,6 +4961,26 @@
 		  }
 		  headers["X-SPF-previous"] = window.location.href;
 		  headers["X-SPF-referer"] = window.location.href;
+=======
+      function loadVideoConfig(item, options, callback) {
+        if (typeof options === "function") {
+          callback = options;
+          options = {};
+        }
+        options.spflink = typeof options.spflink === "boolean" ? options.spflink : true;
+        
+        if (item.stream && item.storyboard) {
+          callback(item.stream, item.storyboard);
+        } else {
+          var spflink = options.spflink,
+              url = "//www.youtube.com/watch?v=" + item.id + (spflink ? "&spf=navigate" : "");
+          var headers = {};
+          if (window.ytspf && window.ytspf.config && window.ytspf.config["experimental-request-headers"]) {
+            headers = window.ytspf.config["experimental-request-headers"];
+          }
+          headers["X-SPF-previous"] = window.location.href;
+          headers["X-SPF-referer"] = window.location.href;
+>>>>>>> master
           if (loc.href.indexOf("https://") === 0) {
             url = "https:" + url;
           } else {
@@ -4968,14 +4989,20 @@
           ytcenter.utils.xhr({
             url: url,
             method: "GET",
+<<<<<<< HEAD
 			headers: headers,
             onload: function(r){
+=======
+            headers: headers,
+            onload: function(r) {
+>>>>>>> master
               var cfg = null;
               var errorType = "unknown";
               try {
                 try {
                   if (spflink) {
                     var parts = JSON.parse(r.responseText);
+<<<<<<< HEAD
                     
                     for (var i = 0, len = parts.length; i < len; i++) {
                       var part = parts[i];
@@ -4988,6 +5015,25 @@
                     if (!cfg) throw "Player configurations not found in spf.";
                   } else {
                     cfg = r.responseText.split("<script>var ytplayer = ytplayer || {};ytplayer.config = ")[1].split(";</script>")[0];
+=======
+                    if (ytcenter.utils.isArray(parts)) {
+                      for (var i = 0, len = parts.length; i < len; i++) {
+                        var part = parts[i];
+                        if (part && part.data && part.data.swfcfg) {
+                          cfg = part.data.swfcfg;
+                          break;
+                        }
+                      }
+                      
+                      if (!cfg) throw "Player configurations not found in spf.";
+                    } else if (parts["reload"] === "now") {
+                      loadVideoConfig(item, { spflink: false }, callback);
+                      return;
+                    }
+                  } else {
+                    cfg = r.responseText.split("<script>var ytplayer = ytplayer || {};ytplayer.config = ")[1].split(";</script>")[0].split(";ytplayer.load")[0];
+                    
+>>>>>>> master
                     cfg = JSON.parse(cfg);
                   }
                 } catch (e) {
@@ -5075,6 +5121,7 @@
         var ids_item = [];
         
         var pendingItems = [];
+<<<<<<< HEAD
         
         for (var i = 0; i < items.length; i++) {
           if (!items[i].processing && !ytcenter.utils.inArray(processedVideoIds, items[i].id)) {
@@ -5088,6 +5135,21 @@
           }
         }
         
+=======
+        
+        for (var i = 0; i < items.length; i++) {
+          if (!items[i].processing && !ytcenter.utils.inArray(processedVideoIds, items[i].id)) {
+            if ((!items[i].likes || !items[i].dislikes)) {
+              processedVideoIds.push(items[i].id);
+              items[i].processing = true;
+              ids_item.push(items[i]);
+              ids.push(items[i].id);
+            }
+            pendingItems.push(items[i]);
+          }
+        }
+        
+>>>>>>> master
         if (ids.length > 0) {
           var url = "https://www.googleapis.com/youtube/v3/videos?part=statistics&id=" + encodeURIComponent(ids.join(",")) + "&key=" + encodeURIComponent(apikey);
           ytcenter.utils.browser_xhr({
@@ -5560,6 +5622,7 @@
           text = stream.size.split("x")[1] + "p";
           background = tableBackground[quality];
           color = tableColor[quality];
+<<<<<<< HEAD
         }
         
         if (ytcenter.settings.videoThumbnailQualityFPS && stream && stream !== "error") {
@@ -5622,8 +5685,75 @@
               }
             });
           }
+=======
+>>>>>>> master
+        }
+        
+        if (ytcenter.settings.videoThumbnailQualityFPS && stream && stream !== "error") {
+          var fps = stream.fps || "30";
+          text += "@" + fps;
+        }
+        
+        
+        wrapper.className = (ytcenter.settings.videoThumbnailQualityVisible === "show_hover" ? " ytcenter-video-thumb-show-hover" : "")
+                          + (ytcenter.settings.videoThumbnailQualityVisible === "hide_hover" ? " ytcenter-video-thumb-hide-hover" : "")
+                          + " ytcenter-thumbnail-quality";
+        wrapper.textContent = text;
+        item.content.className += " ytcenter-thumbnail-quality-pos-" + ytcenter.settings.videoThumbnailQualityPosition;
+        
+        wrapper.style.background = background;
+        wrapper.style.color = color;
+        
+        item.content.appendChild(wrapper);
+      }
+<<<<<<< HEAD
+=======
+      function updateWatchedClass(item) {
+        var watched = ytcenter.utils.hasClass(item.content, "watched"),
+            am, li, s;
+        if (item.itemWrapper && watched) {
+          ytcenter.utils.addClass(item.itemWrapper, "ytcenter-video-watched-wrapper"); // For hiding the item
+        } else if (item.itemWrapper) {
+          ytcenter.utils.removeClass(item.itemWrapper, "ytcenter-video-watched-wrapper"); // For hiding the item
+        }
+        if (loc.pathname === "/feed/subscriptions" && !item.actionMenu) {
+          item.actionMenu = item.wrapper.parentNode.parentNode.parentNode.parentNode.parentNode.nextElementSibling;
+          if (item.actionMenu) {
+            am = item.actionMenu.getElementsByTagName("ul")[0];
+            li = document.createElement("li");
+            li.setAttribute("role", "menuitem");
+            s = document.createElement("span");
+            s.className = "dismiss-menu-choice yt-uix-button-menu-item";
+            s.setAttribute("onclick", ";return false;");
+            if (ytcenter.videoHistory.isVideoWatched(item.id)) {
+              s.textContent = ytcenter.language.getLocale("VIDEOWATCHED_REMOVE");
+            } else {
+              s.textContent = ytcenter.language.getLocale("VIDEOWATCHED_ADD");
+            }
+            ytcenter.utils.addEventListener(li, "click", function(){
+              if (ytcenter.videoHistory.isVideoWatched(item.id)) {
+                ytcenter.videoHistory.removeVideo(item.id);
+                s.textContent = ytcenter.language.getLocale("VIDEOWATCHED_ADD");
+              } else {
+                ytcenter.videoHistory.addVideo(item.id);
+                s.textContent = ytcenter.language.getLocale("VIDEOWATCHED_REMOVE");
+              }
+              updateWatchedMessage(item);
+            }, false);
+            
+            li.appendChild(s);
+            am.insertBefore(li, am.children[0]);
+            ytcenter.events.addEvent("language-refresh", function(){
+              if (ytcenter.videoHistory.isVideoWatched(item.id)) {
+                s.textContent = ytcenter.language.getLocale("VIDEOWATCHED_REMOVE");
+              } else {
+                s.textContent = ytcenter.language.getLocale("VIDEOWATCHED_ADD");
+              }
+            });
+          }
         }
       }
+>>>>>>> master
       
       function updateWatchedMessage(item) {
         var ivw = ytcenter.videoHistory.isVideoWatched(item.id),
@@ -5980,7 +6110,20 @@
           if (loc.pathname === "/" || loc.pathname === "/results" || loc.pathname.indexOf("/feed/") === 0) {
             updateWatchedClass(vt[i]);
           }
+<<<<<<< HEAD
           if (((loc.pathname.indexOf("/user/") === 0 && loc.pathname.indexOf("/videos") !== -1) || loc.pathname === "/" || loc.pathname === "/results" || loc.pathname.indexOf("/feed/") === 0) && ytcenter.settings.watchedVideosIndicator) {
+=======
+          if (
+            ytcenter.settings.watchedVideosIndicator &&
+            (
+              loc.pathname === "/" ||
+              loc.pathname === "/results" ||
+              loc.pathname.indexOf("/feed/") === 0 ||
+              (loc.pathname.indexOf("/user/") === 0 && loc.pathname.indexOf("/videos") !== -1) ||
+              (loc.pathname.indexOf("/channel/") === 0 && loc.pathname.indexOf("/videos") !== -1)
+            )
+          ) {
+>>>>>>> master
             updateWatchedMessage(vt[i]);
           }
         }
@@ -6025,7 +6168,20 @@
             if (loc.pathname === "/" || loc.pathname === "/results" || loc.pathname.indexOf("/feed/") === 0) {
               updateWatchedClass(videoThumbs[i]);
             }
+<<<<<<< HEAD
             if (((loc.pathname.indexOf("/user/") === 0 && loc.pathname.indexOf("/videos") !== -1) || loc.pathname === "/" || loc.pathname === "/results" || loc.pathname.indexOf("/feed/") === 0) && ytcenter.settings.watchedVideosIndicator) {
+=======
+            if (
+              ytcenter.settings.watchedVideosIndicator &&
+              (
+                loc.pathname === "/" ||
+                loc.pathname === "/results" ||
+                loc.pathname.indexOf("/feed/") === 0 ||
+                (loc.pathname.indexOf("/user/") === 0 && loc.pathname.indexOf("/videos") !== -1) ||
+                (loc.pathname.indexOf("/channel/") === 0 && loc.pathname.indexOf("/videos") !== -1)
+              )
+            ) {
+>>>>>>> master
               updateWatchedMessage(videoThumbs[i]);
             }
           }
@@ -11047,7 +11203,11 @@
       
       function fixPlayerSize() {
         /*if (isNewPlayer()) {*/
+<<<<<<< HEAD
           window.matchMedia = null;
+=======
+          window.matchMedia = function(){ return false; };
+>>>>>>> master
         /*} else {
           patchDetour();
         }*/
@@ -19699,6 +19859,10 @@
               "links": [
                 {text: "Wiki", url: "https://github.com/YePpHa/YouTubeCenter/wiki"},
                 {text: "Facebook", url: "https://www.facebook.com/YouTubeCenter"},
+<<<<<<< HEAD
+=======
+                {text: "Reddit", url: "https://www.reddit.com/r/YouTubeCenter/"},
+>>>>>>> master
                 {text: "Google+", url: "https://plus.google.com/111275247987213661483/posts"},
                 {text: "Firefox", url: "https://addons.mozilla.org/en-us/firefox/addon/youtube-center/"},
                 {text: "Opera", url: "https://addons.opera.com/en/extensions/details/youtube-center/"},
@@ -20130,7 +20294,11 @@
           if (response.responseText) {
             try {  
               var j = JSON.parse(response.responseText);
+<<<<<<< HEAD
               if (j.items && j.items.lengh > 0) {
+=======
+              if (j.items && j.items.length > 0) {
+>>>>>>> master
                 callback.apply(j.items[0]);
                 con.log("[callChannelFeed] Success. Username: " + username, j.items[0]);
               } else if (j.error) {
@@ -26839,7 +27007,11 @@
         inject(main_function);
       }
     } else {
+<<<<<<< HEAD
 	  injectScript(function(){ window.matchMedia = null; }, "matchMediaOverride.js");
+=======
+	  injectScript(function(){ window.matchMedia = function(){ return false; }; }, "matchMediaOverride.js");
+>>>>>>> master
       console.log("default");
       /* Continue normally */
       initListeners();

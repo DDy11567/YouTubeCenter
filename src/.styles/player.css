@@ -4,7 +4,11 @@ body.ytcenter-player-gap .watch-stage-mode #placeholder-player {
 }
 
 .watch-stage-mode #player-playlist .radio-playlist .playlist-videos-list {
+<<<<<<< HEAD
   max-height: 390px !important;
+=======
+  max-height: 360px !important;
+>>>>>>> master
 }
 
 #placeholder-player .player-api {
